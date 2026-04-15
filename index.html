@@ -3,285 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Hipótesis 8 Pasos</title>
+    <title>Suite Estadística - Ing. Computación</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { border-bottom: 4px solid #2563eb; color: #2563eb; font-weight: bold; }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 p-4 font-sans pb-20">
-    <div class="max-w-lg mx-auto bg-white rounded-xl shadow-lg overflow-hidden p-6 border-t-4 border-blue-600">
-        <h1 class="text-2xl font-black text-center text-blue-700 mb-1">Suite Estadística</h1>
-        <p class="text-xs text-center text-gray-500 mb-4 font-bold uppercase tracking-wider">Ingeniería de Computación - BDV</p>
-
-        <div class="flex border-b-2 border-gray-200 mb-4">
-            <button onclick="cambiarPestaña('tab1')" id="btnTab1" class="w-1/2 py-2 font-bold text-blue-600 border-b-4 border-blue-600">Pruebas (A,B,E,F)</button>
-            <button onclick="cambiarPestaña('tab2')" id="btnTab2" class="w-1/2 py-2 font-bold text-gray-400 hover:text-blue-500">Potencia (C,D)</button>
+<body class="bg-slate-100 text-slate-800 p-2 md:p-4 font-sans pb-20">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-blue-600">
+        <div class="p-4 bg-slate-50 border-b">
+            <h1 class="text-2xl font-black text-center text-blue-700">Suite Estadística</h1>
+            <p class="text-xs text-center text-gray-500 font-bold uppercase tracking-wider">Simulador 8 Pasos - Prof. Mejías</p>
         </div>
 
-        <div id="tab1" class="space-y-4 block">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-sm font-bold text-gray-700">Tipo de Prueba</label>
-                    <select id="testType" onchange="actualizarUI()" class="w-full mt-1 border-2 border-gray-300 rounded-lg p-2 bg-gray-50">
-                        <option value="z">Prueba Z (Diferencia Medias, σ conocida)</option>
-                        <option value="t">Prueba t (Diferencia Medias, Var. desconocida)</option>
-                        <option value="chi">Prueba Chi-Cuadrado (Una Varianza)</option>
-                        <option value="f">Prueba F de Fisher (Dos Varianzas)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Hipótesis (H1)</label>
-                    <select id="tails" class="w-full mt-1 border-2 border-gray-300 rounded-lg p-2 bg-gray-50">
-                        <option value="right">Mayor que (>)</option>
-                        <option value="left">Menor que (<)</option>
-                        <option value="two">Diferente (≠)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700">Alpha (α)</label>
-                    <input type="number" id="alpha" value="0.05" step="0.01" class="w-full mt-1 border-2 rounded-lg p-2 text-center">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-sm font-bold text-gray-700">Valor de H0 (Límite, Dif. o 'c')</label>
-                    <input type="number" id="mu0" value="1.2" step="0.001" class="w-full mt-1 border-2 border-blue-200 rounded-lg p-2 text-center text-blue-900 font-bold bg-blue-50">
-                </div>
-            </div>
-
-            <div id="panelM1" class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <h3 class="font-bold text-slate-800 text-sm mb-2" id="labelM1">Muestra 1 (Numerador)</h3>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-xs text-gray-500 font-bold">n1</label><input type="number" id="n1" value="15" class="w-full border-2 rounded p-1 text-center bg-white"></div>
-                    <div id="divX1"><label class="text-xs text-gray-500 font-bold">Media (x̄1)</label><input type="number" id="x1" value="3.3433" class="w-full border-2 rounded p-1 text-center bg-white"></div>
-                    <div><label class="text-xs text-gray-500 font-bold">Varianza (S²)</label><input type="number" id="v1" value="0.003467" class="w-full border-2 rounded p-1 text-center bg-white"></div>
-                </div>
-            </div>
-
-            <div id="panelM2" class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <h3 class="font-bold text-slate-800 text-sm mb-2" id="labelM2">Muestra 2 (Denominador)</h3>
-                <div class="grid grid-cols-3 gap-2">
-                    <div><label class="text-xs text-gray-500 font-bold">n2</label><input type="number" id="n2" value="18" class="w-full border-2 rounded p-1 text-center bg-white"></div>
-                    <div id="divX2"><label class="text-xs text-gray-500 font-bold">Media (x̄2)</label><input type="number" id="x2" value="2.0950" class="w-full border-2 rounded p-1 text-center bg-white"></div>
-                    <div><label class="text-xs text-gray-500 font-bold">Varianza (S²)</label><input type="number" id="v2" value="0.006215" class="w-full border-2 rounded p-1 text-center bg-white"></div>
-                </div>
-            </div>
-
-            <button onclick="calcularPrueba()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg">CALCULAR 8 PASOS</button>
-            
-            <div id="resultadosPrueba" class="mt-6 hidden">
-                <ul class="space-y-2 text-sm text-gray-700" id="pasosList"></ul>
-                <div class="mt-4"><canvas id="graficaPrueba" width="400" height="200"></canvas></div>
-            </div>
+        <div class="flex overflow-x-auto border-b-2 border-gray-200 bg-white sticky top-0 z-10 text-sm">
+            <button onclick="openTab('tabAB')" id="btn-tabAB" class="tab-btn active flex-1 py-3 px-2 text-gray-500 hover:text-blue-500 whitespace-nowrap">A-B (Medias)</button>
+            <button onclick="openTab('tabCD')" id="btn-tabCD" class="tab-btn flex-1 py-3 px-2 text-gray-500 hover:text-blue-500 whitespace-nowrap">C-D (Potencia)</button>
+            <button onclick="openTab('tabE')" id="btn-tabE" class="tab-btn flex-1 py-3 px-2 text-gray-500 hover:text-blue-500 whitespace-nowrap">E (1 Varianza)</button>
+            <button onclick="openTab('tabF')" id="btn-tabF" class="tab-btn flex-1 py-3 px-2 text-gray-500 hover:text-blue-500 whitespace-nowrap">F (2 Varianzas)</button>
         </div>
 
-        <div id="tab2" class="space-y-4 hidden">
-            <div class="col-span-2">
-                <label class="block text-sm font-bold text-purple-700">Objetivo del Cálculo</label>
-                <select id="tipoPotencia" onchange="actualizarUI_CD()" class="w-full mt-1 border-2 border-purple-300 rounded-lg p-2 bg-purple-50">
+        <div class="p-4 md:p-6">
+            <div id="tabAB" class="tab-content active space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-bold text-gray-700">Prueba</label>
+                        <select id="ab_type" class="w-full border-2 rounded p-2"><option value="z">Z (σ conocida)</option><option value="t">t de Student (Varianzas Desconocidas)</option></select>
+                    </div>
+                    <div><label class="block text-sm font-bold">Alpha (α)</label><input type="number" id="ab_alpha" value="0.05" step="0.01" class="w-full border-2 rounded p-2 text-center"></div>
+                    <div><label class="block text-sm font-bold text-blue-700">H0 (Diferencia μ)</label><input type="number" id="ab_mu0" value="1.2" step="0.01" class="w-full border-2 border-blue-300 rounded p-2 text-center bg-blue-50 font-bold"></div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-bold">H1 (Cola)</label>
+                        <select id="ab_tail" class="w-full border-2 rounded p-2"><option value="right">Mayor que (>)</option><option value="left">Menor que (<)</option><option value="two">Diferente (≠)</option></select>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="p-3 bg-slate-50 border rounded-lg">
+                        <h3 class="font-bold text-sm mb-2">Muestra 1</h3>
+                        <textarea id="ab_raw1" rows="1" class="w-full border p-1 text-sm mb-1" placeholder="Pegar datos crudos aquí..."></textarea>
+                        <button onclick="calcRaw('ab_raw1', 'ab_n1', 'ab_x1', 'ab_v1')" class="w-full bg-slate-800 text-white text-xs font-bold py-1 rounded mb-2">Autocalcular ↓</button>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><label class="text-xs text-gray-500 font-bold">n1</label><input type="number" id="ab_n1" value="15" class="w-full border p-1 rounded"></div>
+                            <div><label class="text-xs text-gray-500 font-bold">Media (x̄1)</label><input type="number" id="ab_x1" value="3.3433" class="w-full border p-1 rounded"></div>
+                            <div><label class="text-xs text-gray-500 font-bold">Varianza (S²)</label><input type="number" id="ab_v1" value="0.003467" class="w-full border p-1 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-50 border rounded-lg">
+                        <h3 class="font-bold text-sm mb-2">Muestra 2</h3>
+                        <textarea id="ab_raw2" rows="1" class="w-full border p-1 text-sm mb-1" placeholder="Pegar datos crudos aquí..."></textarea>
+                        <button onclick="calcRaw('ab_raw2', 'ab_n2', 'ab_x2', 'ab_v2')" class="w-full bg-slate-800 text-white text-xs font-bold py-1 rounded mb-2">Autocalcular ↓</button>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><label class="text-xs text-gray-500 font-bold">n2</label><input type="number" id="ab_n2" value="18" class="w-full border p-1 rounded"></div>
+                            <div><label class="text-xs text-gray-500 font-bold">Media (x̄2)</label><input type="number" id="ab_x2" value="2.0950" class="w-full border p-1 rounded"></div>
+                            <div><label class="text-xs text-gray-500 font-bold">Varianza (S²)</label><input type="number" id="ab_v2" value="0.006215" class="w-full border p-1 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="runAB()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-lg">EJECUTAR 8 PASOS</button>
+                <div id="out_ab" class="hidden mt-4 bg-white border p-4 rounded-lg shadow-inner"></div>
+                <div class="mt-4"><canvas id="chart_ab" width="400" height="200"></canvas></div>
+            </div>
+
+            <div id="tabCD" class="tab-content space-y-4">
+                <select id="cd_type" onchange="toggleCD()" class="w-full border-2 border-purple-300 bg-purple-50 rounded p-2 font-bold text-purple-800">
                     <option value="c">Inciso C: Calcular Potencia (1-β)</option>
-                    <option value="d">Inciso D: Calcular Tamaño de Muestra (n)</option>
+                    <option value="d">Inciso D: Calcular Tamaño Muestra (n)</option>
                 </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-xs font-bold text-gray-700">Media H0 (Límite)</label><input type="number" id="cd_mu0" value="1.2" class="w-full border rounded p-2 text-center"></div>
+                    <div><label class="text-xs font-bold text-gray-700">Media Real H1</label><input type="number" id="cd_mu1" value="1.35" class="w-full border rounded p-2 text-center"></div>
+                    <div><label class="text-xs font-bold text-gray-700">Alpha (α)</label><input type="number" id="cd_alpha" value="0.05" class="w-full border rounded p-2 text-center"></div>
+                    <div><label class="text-xs font-bold text-gray-700">Varianza Poblacional (σ²)</label><input type="number" id="cd_var" value="0.0324" class="w-full border rounded p-2 text-center"></div>
+                    
+                    <div class="cd_incisoC"><label class="text-xs font-bold text-gray-700">n1</label><input type="number" id="cd_n1" value="15" class="w-full border rounded p-2 text-center"></div>
+                    <div class="cd_incisoC"><label class="text-xs font-bold text-gray-700">n2</label><input type="number" id="cd_n2" value="18" class="w-full border rounded p-2 text-center"></div>
+                    
+                    <div class="cd_incisoD col-span-2 hidden"><label class="text-xs font-bold text-purple-700">Potencia Deseada (1-β)</label><input type="number" id="cd_pot" value="0.80" class="w-full border-2 border-purple-400 rounded p-2 text-center font-bold"></div>
+                </div>
+                <button onclick="runCD()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-3 rounded-xl shadow-lg">CALCULAR Y GRAFICAR</button>
+                <div id="out_cd" class="hidden mt-4 bg-white border border-purple-200 p-4 rounded-lg shadow-inner text-sm space-y-2"></div>
+                <div class="mt-4"><canvas id="chart_cd" width="400" height="200"></canvas></div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 p-4 bg-slate-50 border rounded-lg">
-                <div><label class="text-xs font-bold text-gray-700">Media H0 (Límite Banco)</label><input type="number" id="p_mu0" value="1.2" class="w-full border rounded p-1 text-center"></div>
-                <div><label class="text-xs font-bold text-gray-700">Media Real H1 (Analistas)</label><input type="number" id="p_mu1" value="1.35" class="w-full border rounded p-1 text-center"></div>
-                <div><label class="text-xs font-bold text-gray-700">Alpha (α)</label><input type="number" id="p_alpha" value="0.05" class="w-full border rounded p-1 text-center"></div>
-                <div><label class="text-xs font-bold text-gray-700">Varianza Conocida (σ²)</label><input type="number" id="p_var" value="0.0324" class="w-full border rounded p-1 text-center"></div>
-                
-                <div class="incisoC_inputs"><label class="text-xs font-bold text-gray-700">Muestra 1 (n1)</label><input type="number" id="p_n1" value="15" class="w-full border rounded p-1 text-center"></div>
-                <div class="incisoC_inputs"><label class="text-xs font-bold text-gray-700">Muestra 2 (n2)</label><input type="number" id="p_n2" value="18" class="w-full border rounded p-1 text-center"></div>
-                
-                <div class="incisoD_inputs col-span-2 hidden"><label class="text-xs font-bold text-purple-700">Potencia Deseada (1-β)</label><input type="number" id="p_potencia" value="0.80" class="w-full border-2 border-purple-300 rounded p-1 text-center font-bold"></div>
+            <div id="tabE" class="tab-content space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm font-bold">Alpha (α)</label><input type="number" id="e_alpha" value="0.05" step="0.01" class="w-full border-2 rounded p-2 text-center"></div>
+                    <div><label class="block text-sm font-bold text-blue-700">H0 (Límite σ²)</label><input type="number" id="e_mu0" value="0.005" step="0.001" class="w-full border-2 border-blue-300 rounded p-2 text-center bg-blue-50 font-bold"></div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-bold">H1 (Cola)</label>
+                        <select id="e_tail" class="w-full border-2 rounded p-2"><option value="right">Mayor que (>)</option><option value="left">Menor que (<)</option></select>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 border rounded-lg">
+                    <h3 class="font-bold text-sm mb-2">Datos de la Muestra</h3>
+                    <textarea id="e_raw" rows="2" class="w-full border p-1 text-sm mb-1" placeholder="Pegar datos crudos aquí..."></textarea>
+                    <button onclick="calcRaw('e_raw', 'e_n', 'e_x', 'e_v')" class="w-full bg-slate-800 text-white text-xs font-bold py-1 rounded mb-2">Autocalcular ↓</button>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div><label class="text-xs text-gray-500 font-bold">n</label><input type="number" id="e_n" value="18" class="w-full border p-1 rounded"></div>
+                        <div class="opacity-50"><label class="text-xs text-gray-500 font-bold">Media (x̄)</label><input type="number" id="e_x" value="2.0950" class="w-full border p-1 rounded" disabled></div>
+                        <div><label class="text-xs text-gray-500 font-bold">Varianza (S²)</label><input type="number" id="e_v" value="0.006215" step="0.000001" class="w-full border p-1 rounded"></div>
+                    </div>
+                </div>
+                <button onclick="runE()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-lg">EJECUTAR 8 PASOS</button>
+                <div id="out_e" class="hidden mt-4 bg-white border p-4 rounded-lg shadow-inner"></div>
+                <div class="mt-4"><canvas id="chart_e" width="400" height="200"></canvas></div>
             </div>
 
-            <button onclick="calcularPotencia()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-xl shadow-lg">CALCULAR Y GRAFICAR</button>
+            <div id="tabF" class="tab-content space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-sm font-bold">Alpha (α)</label><input type="number" id="f_alpha" value="0.05" step="0.01" class="w-full border-2 rounded p-2 text-center"></div>
+                    <div><label class="block text-sm font-bold text-blue-700">H0 (Constante 'c')</label><input type="number" id="f_mu0" value="1.10" step="0.01" class="w-full border-2 border-blue-300 rounded p-2 text-center bg-blue-50 font-bold"></div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-bold">H1 (Cola)</label>
+                        <select id="f_tail" class="w-full border-2 rounded p-2"><option value="right">Mayor que (>)</option><option value="left">Menor que (<)</option></select>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="p-3 bg-slate-50 border rounded-lg">
+                        <h3 class="font-bold text-sm mb-2">Numerador (Muestra 1)</h3>
+                        <textarea id="f_raw1" rows="1" class="w-full border p-1 text-sm mb-1" placeholder="Ej: SwiftPay..."></textarea>
+                        <button onclick="calcRaw('f_raw1', 'f_n1', 'f_x1', 'f_v1')" class="w-full bg-slate-800 text-white text-xs font-bold py-1 rounded mb-2">Autocalcular ↓</button>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><label class="text-xs text-gray-500 font-bold">n1</label><input type="number" id="f_n1" value="18" class="w-full border p-1 rounded"></div>
+                            <div class="opacity-50"><label class="text-xs text-gray-500 font-bold">Media</label><input type="number" id="f_x1" value="" class="w-full border p-1 rounded" disabled></div>
+                            <div><label class="text-xs text-gray-500 font-bold">Varianza 1</label><input type="number" id="f_v1" value="0.006215" class="w-full border p-1 rounded"></div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-50 border rounded-lg">
+                        <h3 class="font-bold text-sm mb-2">Denominador (Muestra 2)</h3>
+                        <textarea id="f_raw2" rows="1" class="w-full border p-1 text-sm mb-1" placeholder="Ej: SwiftChimb..."></textarea>
+                        <button onclick="calcRaw('f_raw2', 'f_n2', 'f_x2', 'f_v2')" class="w-full bg-slate-800 text-white text-xs font-bold py-1 rounded mb-2">Autocalcular ↓</button>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div><label class="text-xs text-gray-500 font-bold">n2</label><input type="number" id="f_n2" value="15" class="w-full border p-1 rounded"></div>
+                            <div class="opacity-50"><label class="text-xs text-gray-500 font-bold">Media</label><input type="number" id="f_x2" value="" class="w-full border p-1 rounded" disabled></div>
+                            <div><label class="text-xs text-gray-500 font-bold">Varianza 2</label><input type="number" id="f_v2" value="0.003467" class="w-full border p-1 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="runF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-lg">EJECUTAR 8 PASOS</button>
+                <div id="out_f" class="hidden mt-4 bg-white border p-4 rounded-lg shadow-inner"></div>
+                <div class="mt-4"><canvas id="chart_f" width="400" height="200"></canvas></div>
+            </div>
 
-            <div id="resultadosPotencia" class="mt-6 hidden bg-white border border-purple-200 rounded p-4 shadow-sm">
-                <h3 class="font-bold text-purple-800 border-b pb-2 mb-2">Desarrollo Matemático:</h3>
-                <div id="textoPotencia" class="text-sm space-y-2"></div>
-                <div class="mt-6"><canvas id="graficaDoble" width="400" height="200"></canvas></div>
+            <div class="mt-8 border-t pt-4">
+                <h3 class="font-bold text-center mb-2">Galería (exam_1.jpg / exam_2.jpg)</h3>
+                <div class="flex gap-2">
+                    <img src="exam_1.jpg" class="w-1/2 rounded border" onerror="this.style.display='none'">
+                    <img src="exam_2.jpg" class="w-1/2 rounded border" onerror="this.style.display='none'">
+                </div>
             </div>
         </div>
-
-        <div class="mt-10 border-t-2 pt-6">
-            <h3 class="font-black text-lg text-slate-800 text-center mb-2">📸 Galería del Examen Resuelto</h3>
-            <p class="text-xs text-center text-gray-500 mb-4">Sube los archivos <code>examen1.jpeg</code> y <code>examen2.jpeg</code> a tu GitHub para verlos aquí.</p>
-            <div class="space-y-4">
-                <img src="examen1.jpeg" alt="Examen Página 1" class="w-full rounded border shadow-sm object-cover bg-gray-100" onerror="this.style.display='none'">
-                <img src="examen2.jpeg" alt="Examen Página 2" class="w-full rounded border shadow-sm object-cover bg-gray-100" onerror="this.style.display='none'">
-            </div>
-        </div>
-
     </div>
 
     <script>
-        let myChart = null;
-        let chartDoble = null;
         Chart.register(window['chartjs-plugin-annotation']);
+        let charts = { ab: null, cd: null, e: null, f: null };
 
-        function cambiarPestaña(tabId) {
-            document.getElementById('tab1').style.display = tabId === 'tab1' ? 'block' : 'none';
-            document.getElementById('tab2').style.display = tabId === 'tab2' ? 'block' : 'none';
-            
-            document.getElementById('btnTab1').className = tabId === 'tab1' ? "w-1/2 py-2 font-bold text-blue-600 border-b-4 border-blue-600" : "w-1/2 py-2 font-bold text-gray-400 hover:text-blue-500 border-b-4 border-transparent";
-            document.getElementById('btnTab2').className = tabId === 'tab2' ? "w-1/2 py-2 font-bold text-purple-600 border-b-4 border-purple-600" : "w-1/2 py-2 font-bold text-gray-400 hover:text-purple-500 border-b-4 border-transparent";
+        // 1. Navegación de Pestañas
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('btn-' + tabId).classList.add('active');
         }
 
-        function actualizarUI() {
-            let type = document.getElementById('testType').value;
-            let m2 = document.getElementById('panelM2');
-            let dx1 = document.getElementById('divX1');
-            if(type === 'chi') {
-                m2.style.display = 'none'; dx1.style.display = 'none';
-                document.getElementById('labelM1').innerText = "Datos de la Muestra";
+        // 2. Procesador de Datos Crudos
+        function calcRaw(idRaw, idN, idX, idV) {
+            let text = document.getElementById(idRaw).value.replace(/,/g, ' ');
+            let nums = text.split(/\s+/).map(Number).filter(n => !isNaN(n));
+            if(nums.length === 0) return alert("No hay números válidos");
+            let n = nums.length;
+            let mean = nums.reduce((a,b)=>a+b,0) / n;
+            let variance = n > 1 ? nums.reduce((a,b)=>a+Math.pow(b-mean,2),0)/(n-1) : 0;
+            
+            document.getElementById(idN).value = n;
+            document.getElementById(idX).value = mean.toFixed(4);
+            document.getElementById(idV).value = variance.toFixed(6);
+            
+            let btn = document.getElementById(idRaw).nextElementSibling;
+            btn.classList.replace('bg-slate-800', 'bg-green-600');
+            btn.innerText = "¡Calculado!";
+            setTimeout(() => { btn.classList.replace('bg-green-600', 'bg-slate-800'); btn.innerText = "Autocalcular ↓"; }, 1500);
+        }
+
+        // 3. Generador de Resultados (8 Pasos UI)
+        function drawResult(containerId, steps, rechaza) {
+            let html = `<ul class="space-y-2 text-sm">`;
+            steps.forEach(s => html += `<li>${s}</li>`);
+            html += `</ul>`;
+            html += rechaza 
+                ? `<div class="mt-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700 font-bold text-sm">8) Conclusión: SE RECHAZA H0</div>`
+                : `<div class="mt-3 p-2 bg-green-100 border-l-4 border-green-500 text-green-700 font-bold text-sm">8) Conclusión: NO SE RECHAZA H0</div>`;
+            document.getElementById(containerId).innerHTML = html;
+            document.getElementById(containerId).classList.remove('hidden');
+        }
+
+        // 4. Graficador Universal
+        function drawChart(canvasId, type, stat, crit, df1, df2, tail) {
+            if(charts[canvasId]) charts[canvasId].destroy();
+            let ctx = document.getElementById(canvasId).getContext('2d');
+            let labels = [], data = [];
+            let minX = 0, maxX = 0;
+
+            if(type === 'z' || type === 't') {
+                minX = -4; maxX = 4;
+                for(let x=minX; x<=maxX; x+=0.1) {
+                    labels.push(x.toFixed(1));
+                    data.push(type === 'z' ? jStat.normal.pdf(x,0,1) : jStat.studentt.pdf(x,df1));
+                }
+            } else if (type === 'chi') {
+                maxX = Math.max(crit*1.5, stat*1.5, df1*2);
+                for(let x=0; x<=maxX; x+=maxX/50) {
+                    labels.push(x.toFixed(1)); data.push(jStat.chisquare.pdf(x,df1));
+                }
             } else if (type === 'f') {
-                m2.style.display = 'block'; dx1.style.display = 'none';
-                document.getElementById('divX2').style.display = 'none';
-                document.getElementById('labelM1').innerText = "Muestra 1 (Numerador F)";
-                document.getElementById('labelM2').innerText = "Muestra 2 (Denominador F)";
-            } else {
-                m2.style.display = 'block'; dx1.style.display = 'block'; document.getElementById('divX2').style.display = 'block';
-                document.getElementById('labelM1').innerText = "Muestra 1"; document.getElementById('labelM2').innerText = "Muestra 2";
-            }
-        }
-
-        function actualizarUI_CD() {
-            let tipo = document.getElementById('tipoPotencia').value;
-            let inputsC = document.querySelectorAll('.incisoC_inputs');
-            let inputsD = document.querySelectorAll('.incisoD_inputs');
-            
-            if(tipo === 'c') {
-                inputsC.forEach(el => el.style.display = 'block');
-                inputsD.forEach(el => el.style.display = 'none');
-            } else {
-                inputsC.forEach(el => el.style.display = 'none');
-                inputsD.forEach(el => el.style.display = 'block');
-            }
-        }
-
-        /* LOGICA PESTAÑA 1: 8 PASOS (Omitida para no saturar, es igual a la versión anterior) */
-        function calcularPrueba() {
-            // [Todo el código anterior de la función calcular() va aquí. Para el despliegue final en tu GitHub debes pegar el bloque de la respuesta anterior, pero para resumir y enfocarnos en C y D en esta demostración, saltamos a la magia nueva].
-            alert("Esta pestaña funciona exactamente igual que la versión anterior. ¡Ve a la pestaña POTENCIA para ver la nueva magia!");
-        }
-
-        /* ======================================================== */
-        /* LOGICA PESTAÑA 2: POTENCIA Y TAMAÑO DE MUESTRA (C y D)   */
-        /* ======================================================== */
-        function calcularPotencia() {
-            let tipo = document.getElementById('tipoPotencia').value;
-            let mu0 = parseFloat(document.getElementById('p_mu0').value);
-            let mu1 = parseFloat(document.getElementById('p_mu1').value);
-            let alpha = parseFloat(document.getElementById('p_alpha').value);
-            let varPob = parseFloat(document.getElementById('p_var').value);
-            
-            let zAlpha = jStat.normal.inv(1 - alpha, 0, 1);
-            let SE, Vc, Zbeta, Potencia, nRequerido, txt = "";
-
-            if (tipo === 'c') {
-                // Inciso C: Calcular Potencia dado un 'n'
-                let n1 = parseFloat(document.getElementById('p_n1').value);
-                let n2 = parseFloat(document.getElementById('p_n2').value);
-                
-                SE = Math.sqrt((varPob/n1) + (varPob/n2));
-                Vc = mu0 + (zAlpha * SE); // Umbral de decisión (Frontera)
-                
-                // Calculamos Z asumiendo que mu1 es real
-                Zbeta = (Vc - mu1) / SE;
-                
-                // La potencia es el área a la derecha del Vc bajo la curva H1
-                Potencia = 1 - jStat.normal.cdf(Zbeta, 0, 1);
-                
-                txt = `
-                    <p><b>1. Valor Crítico (Frontera):</b> Vc* = μ0 + (Zα * SE)</p>
-                    <p>Error Estándar (SE) = √(${varPob}/${n1} + ${varPob}/${n2}) = <b>${SE.toFixed(4)}</b></p>
-                    <p>Vc* = ${mu0} + (${zAlpha.toFixed(3)} * ${SE.toFixed(4)}) = <b>${Vc.toFixed(4)} s</b></p>
-                    <hr class="my-2">
-                    <p><b>2. Probabilidad bajo H1 (μ real = ${mu1}):</b></p>
-                    <p>Z_nueva = (Vc* - μ_real) / SE = (${Vc.toFixed(4)} - ${mu1}) / ${SE.toFixed(4)} = <b>${Zbeta.toFixed(3)}</b></p>
-                    <p class="mt-2 text-purple-700 text-lg"><b>POTENCIA (1-β) = ${(Potencia*100).toFixed(1)}%</b></p>
-                `;
-                
-                dibujarGraficaDoble(mu0, mu1, SE, Vc, Potencia);
-            } 
-            else {
-                // Inciso D: Calcular Muestra 'n' dada una Potencia
-                let potDeseada = parseFloat(document.getElementById('p_potencia').value);
-                let beta = 1 - potDeseada;
-                Zbeta = Math.abs(jStat.normal.inv(beta, 0, 1)); // Z para el error tipo II
-                
-                // Fórmula de n
-                let dif = mu1 - mu0;
-                let sumZ = zAlpha + Zbeta;
-                let nExacto = Math.pow(sumZ / dif, 2) * (varPob + varPob);
-                nRequerido = Math.ceil(nExacto); // Siempre hacia arriba en estadística
-                
-                // Recalcular SE y Vc para la gráfica final con el 'n' redondeado
-                SE = Math.sqrt((varPob/nRequerido) + (varPob/nRequerido));
-                Vc = mu0 + (zAlpha * SE);
-
-                txt = `
-                    <p><b>1. Ubicar los Valores Z:</b></p>
-                    <p>Zα (para ${alpha}) = <b>${zAlpha.toFixed(3)}</b></p>
-                    <p>Zβ (para potencia ${potDeseada}) = <b>${Zbeta.toFixed(3)}</b></p>
-                    <hr class="my-2">
-                    <p><b>2. Despeje de la Ecuación:</b></p>
-                    <p>n = [ (Zα + Zβ) / (μ1 - μ0) ]² * (σ²1 + σ²2)</p>
-                    <p>n = [ (${zAlpha.toFixed(3)} + ${Zbeta.toFixed(3)}) / ${dif.toFixed(2)} ]² * (${varPob} + ${varPob})</p>
-                    <p>n exacto = <b>${nExacto.toFixed(4)}</b></p>
-                    <p class="mt-2 text-purple-700 text-lg"><b>TAMAÑO DE MUESTRA REQUERIDO: n = ${nRequerido}</b> (Redondeo al superior)</p>
-                `;
-                
-                dibujarGraficaDoble(mu0, mu1, SE, Vc, potDeseada);
+                maxX = Math.max(crit*1.5, stat*1.5, 5);
+                for(let x=0; x<=maxX; x+=maxX/50) {
+                    labels.push(x.toFixed(2)); data.push(jStat.centralF.pdf(x,df1,df2));
+                }
             }
 
-            document.getElementById('resultadosPotencia').classList.remove('hidden');
-            document.getElementById('textoPotencia').innerHTML = txt;
-        }
-
-        function dibujarGraficaDoble(mu0, mu1, se, vc, potencia) {
-            const ctx = document.getElementById('graficaDoble').getContext('2d');
-            if(chartDoble) chartDoble.destroy();
-
-            let labels = [], dataH0 = [], dataH1 = [];
-            let minX = Math.min(mu0 - 3*se, mu1 - 3*se);
-            let maxX = Math.max(mu0 + 3*se, mu1 + 3*se);
-
-            for(let x = minX; x <= maxX; x += se/10) {
-                labels.push(x.toFixed(3));
-                dataH0.push(jStat.normal.pdf(x, mu0, se));
-                dataH1.push(jStat.normal.pdf(x, mu1, se));
-            }
-
-            chartDoble = new Chart(ctx, {
+            charts[canvasId] = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'H0 (μ='+mu0+')', data: dataH0, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, pointRadius: 0 },
-                        { label: 'H1 Real (μ='+mu1+')', data: dataH1, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.3)', fill: true, pointRadius: 0 }
-                    ]
-                },
+                data: { labels: labels, datasets: [{ data: data, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, pointRadius: 0 }] },
                 options: {
-                    responsive: true,
                     plugins: {
                         annotation: {
                             annotations: {
-                                lineaFrontera: {
-                                    type: 'line',
-                                    xMin: vc.toFixed(3), xMax: vc.toFixed(3),
-                                    borderColor: 'red', borderWidth: 2, borderDash: [5, 5],
-                                    label: { display: true, content: 'Frontera: ' + vc.toFixed(3), position: 'start', backgroundColor: 'rgba(255,0,0,0.8)' }
-                                }
+                                lineCrit: { type: 'line', xMin: crit.toFixed(type==='f'?2:1), xMax: crit.toFixed(type==='f'?2:1), borderColor: 'red', borderWidth: 2, borderDash: [5,5], label: { display: true, content: 'Vc: ' + crit.toFixed(2), position: 'start', backgroundColor: 'rgba(255,0,0,0.8)' } },
+                                lineStat: { type: 'line', xMin: stat.toFixed(type==='f'?2:1), xMax: stat.toFixed(type==='f'?2:1), borderColor: 'green', borderWidth: 3, label: { display: true, content: 'Est: ' + stat.toFixed(2), position: 'end', backgroundColor: 'rgba(0,128,0,0.8)' } }
                             }
                         }
                     },
-                    scales: { x: { display: false }, y: { display: false } }
+                    scales: { x: { display: true }, y: { display: false } }
                 }
             });
         }
-        actualizarUI_CD();
+
+        // --- LÓGICA PESTAÑA A-B ---
+        function runAB() {
+            let t = document.getElementById('ab_type').value, tail = document.getElementById('ab_tail').value;
+            let a = parseFloat(document.getElementById('ab_alpha').value), h0 = parseFloat(document.getElementById('ab_mu0').value);
+            let n1 = parseFloat(document.getElementById('ab_n1').value), x1 = parseFloat(document.getElementById('ab_x1').value), v1 = parseFloat(document.getElementById('ab_v1').value);
+            let n2 = parseFloat(document.getElementById('ab_n2').value), x2 = parseFloat(document.getElementById('ab_x2').value), v2 = parseFloat(document.getElementById('ab_v2').value);
+            
+            let se = Math.sqrt((v1/n1) + (v2/n2));
+            let stat = ((x1 - x2) - h0) / se;
+            let gl = t === 't' ? (n1 + n2 - 2) : 1000;
+            let crit = 0, rechaza = false;
+
+            if(tail === 'right') { crit = t==='t'?jStat.studentt.inv(1-a,gl):jStat.normal.inv(1-a,0,1); rechaza = stat > crit; }
+            else if(tail === 'left') { crit = t==='t'?jStat.studentt.inv(a,gl):jStat.normal.inv(a,0,1); rechaza = stat < crit; }
+            else { crit = t==='t'?jStat.studentt.inv(1-a/2,gl):jStat.normal.inv(1-a/2,0,1); rechaza = Math.abs(stat) > crit; stat = Math.abs(stat); }
+
+            let steps = [
+                `<b>1) Parámetro:</b> Dif. de medias (μ1 - μ2)`, `<b>2) H0:</b> μ1 - μ2 = ${h0}`, `<b>3) H1:</b> μ1 - μ2 ${tail==='right'?'>':tail==='left'?'<':'≠'} ${h0}`,
+                `<b>4) Alpha:</b> ${a}`, `<b>5) Estadístico:</b> ${t==='z'?'Z':'t'}0`, `<b>6) Vc:</b> ${crit.toFixed(3)}`, `<b>7) Cálculo:</b> ${stat.toFixed(4)}`
+            ];
+            drawResult('out_ab', steps, rechaza);
+            drawChart('chart_ab', t, stat, crit, gl, 0, tail);
+        }
+
+        // --- LÓGICA PESTAÑA C-D (POTENCIA) ---
+        function toggleCD() {
+            let t = document.getElementById('cd_type').value;
+            document.querySelectorAll('.cd_incisoC').forEach(el => el.style.display = t==='c'?'block':'none');
+            document.querySelectorAll('.cd_incisoD').forEach(el => el.style.display = t==='d'?'block':'none');
+        }
+        function runCD() {
+            let t = document.getElementById('cd_type').value;
+            let mu0 = parseFloat(document.getElementById('cd_mu0').value), mu1 = parseFloat(document.getElementById('cd_mu1').value);
+            let alpha = parseFloat(document.getElementById('cd_alpha').value), vp = parseFloat(document.getElementById('cd_var').value);
+            let zAlpha = jStat.normal.inv(1-alpha, 0, 1);
+            let se, vc, txt="";
+
+            if(t==='c') {
+                let n1 = parseFloat(document.getElementById('cd_n1').value), n2 = parseFloat(document.getElementById('cd_n2').value);
+                se = Math.sqrt((vp/n1)+(vp/n2)); vc = mu0 + (zAlpha*se);
+                let zb = (vc - mu1)/se; let pot = 1 - jStat.normal.cdf(zb,0,1);
+                txt = `<b>Vc:</b> ${vc.toFixed(4)} <br> <b>Z (H1):</b> ${zb.toFixed(3)} <br> <span class='text-purple-700 font-bold text-lg'>Potencia = ${(pot*100).toFixed(2)}%</span>`;
+            } else {
+                let pot = parseFloat(document.getElementById('cd_pot').value);
+                let zb = Math.abs(jStat.normal.inv(1-pot, 0, 1));
+                let nExact = Math.pow((zAlpha+zb)/(mu1-mu0), 2) * (vp+vp);
+                let nReq = Math.ceil(nExact);
+                se = Math.sqrt((vp/nReq)+(vp/nReq)); vc = mu0 + (zAlpha*se);
+                txt = `<b>Zα:</b> ${zAlpha.toFixed(3)} | <b>Zβ:</b> ${zb.toFixed(3)} <br> <span class='text-purple-700 font-bold text-lg'>Muestra (n) = ${nReq} / grupo</span>`;
+            }
+            document.getElementById('out_cd').innerHTML = txt;
+            document.getElementById('out_cd').classList.remove('hidden');
+
+            // Grafica doble
+            if(charts['chart_cd']) charts['chart_cd'].destroy();
+            let ctx = document.getElementById('chart_cd').getContext('2d');
+            let labels=[], d0=[], d1=[], minX=Math.min(mu0-3*se, mu1-3*se), maxX=Math.max(mu0+3*se, mu1+3*se);
+            for(let x=minX; x<=maxX; x+=se/10) { labels.push(x.toFixed(2)); d0.push(jStat.normal.pdf(x,mu0,se)); d1.push(jStat.normal.pdf(x,mu1,se)); }
+            charts['chart_cd'] = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [
+                { label: 'H0', data: d0, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, pointRadius: 0 },
+                { label: 'H1', data: d1, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.3)', fill: true, pointRadius: 0 }
+            ]}, options: { scales:{x:{display:false},y:{display:false}}, plugins: { annotation: { annotations: { line1: { type:'line', xMin:vc.toFixed(2), xMax:vc.toFixed(2), borderColor:'red', label:{display:true, content:'Vc: '+vc.toFixed(2)} } } } } } });
+        }
+
+        // --- LÓGICA PESTAÑA E (CHI) ---
+        function runE() {
+            let a = parseFloat(document.getElementById('e_alpha').value), h0 = parseFloat(document.getElementById('e_mu0').value), tail = document.getElementById('e_tail').value;
+            let n = parseFloat(document.getElementById('e_n').value), v = parseFloat(document.getElementById('e_v').value);
+            let gl = n - 1; let stat = (gl * v) / h0; let crit = 0, rechaza = false;
+            
+            if(tail === 'right') { crit = jStat.chisquare.inv(1-a, gl); rechaza = stat > crit; }
+            else { crit = jStat.chisquare.inv(a, gl); rechaza = stat < crit; }
+            
+            let steps = [
+                `<b>1) Parámetro:</b> Varianza (σ²)`, `<b>2) H0:</b> σ² = ${h0}`, `<b>3) H1:</b> σ² ${tail==='right'?'>':'<'} ${h0}`,
+                `<b>4) Alpha:</b> ${a}`, `<b>5) Estadístico:</b> χ²`, `<b>6) Vc:</b> ${crit.toFixed(3)} (gl=${gl})`, `<b>7) Cálculo:</b> χ² = ${stat.toFixed(4)}`
+            ];
+            drawResult('out_e', steps, rechaza); drawChart('chart_e', 'chi', stat, crit, gl, 0, tail);
+        }
+
+        // --- LÓGICA PESTAÑA F (FISHER) ---
+        function runF() {
+            let a = parseFloat(document.getElementById('f_alpha').value), h0 = parseFloat(document.getElementById('f_mu0').value), tail = document.getElementById('f_tail').value;
+            let n1 = parseFloat(document.getElementById('f_n1').value), v1 = parseFloat(document.getElementById('f_v1').value);
+            let n2 = parseFloat(document.getElementById('f_n2').value), v2 = parseFloat(document.getElementById('f_v2').value);
+            
+            let gl1 = n1 - 1, gl2 = n2 - 1; let stat = v1 / (h0 * v2); let crit = 0, rechaza = false;
+            
+            if(tail === 'right') { crit = jStat.centralF.inv(1-a, gl1, gl2); rechaza = stat > crit; }
+            else { crit = jStat.centralF.inv(a, gl1, gl2); rechaza = stat < crit; }
+            
+            let steps = [
+                `<b>1) Parámetro:</b> Razón (σ²1 / σ²2)`, `<b>2) H0:</b> σ²1 = ${h0} * σ²2`, `<b>3) H1:</b> σ²1 ${tail==='right'?'>':'<'} ${h0} * σ²2`,
+                `<b>4) Alpha:</b> ${a}`, `<b>5) Estadístico:</b> F0`, `<b>6) Vc:</b> ${crit.toFixed(3)} (gl1=${gl1}, gl2=${gl2})`, `<b>7) Cálculo:</b> F0 = ${stat.toFixed(4)}`
+            ];
+            drawResult('out_f', steps, rechaza); drawChart('chart_f', 'f', stat, crit, gl1, gl2, tail);
+        }
+        
+        // Init
+        toggleCD();
     </script>
 </body>
 </html>
